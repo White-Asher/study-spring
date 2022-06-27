@@ -5,12 +5,15 @@
         http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
 
+    <!--    base-package가 되는 곳에서부터 하위로 내려가면서 컴포넌드들 즉, bean들을 scan하라는 의미-->
+    <context:component-scan base-package="io.travelclub.spring"/>
 
-    <bean id="clubStore" class="io.travelclub.spring.store.mapstore.ClubMapStore"/>
+<!--    <bean id="clubStore" class="io.travelclub.spring.store.mapstore.ClubMapStore"/>-->
 
-    <bean id="clubService" class="io.travelclub.spring.service.logic.ClubServiceLogic">
-        <constructor-arg ref="clubStore"/>
-    </bean>
+<!--    <bean id="clubService" class="io.travelclub.spring.service.logic.ClubServiceLogic">-->
+<!--        <constructor-arg ref="clubStore"/>-->
+<!--    </bean>-->
+    
 
 </beans>
 

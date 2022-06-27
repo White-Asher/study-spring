@@ -6,9 +6,11 @@ import io.travelclub.spring.service.sdo.TravelClubCdo;
 import io.travelclub.spring.shared.NameValueList;
 import io.travelclub.spring.store.ClubStore;
 import io.travelclub.spring.store.mapstore.ClubMapStore;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service("clubService")
 public class ClubServiceLogic implements ClubService {
 
     private ClubStore clubStore;
@@ -19,8 +21,9 @@ public class ClubServiceLogic implements ClubService {
 
     @Override
     public String registerClub(TravelClubCdo club) {
-//        clubStore
-        return null;
+        TravelClub newClub = new TravelClub(club.getName(), club.getIntro());
+        newClub.checkValidation();
+        return clubStore.create(newClub);
     }
 
     @Override
