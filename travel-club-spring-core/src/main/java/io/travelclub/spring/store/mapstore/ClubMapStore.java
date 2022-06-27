@@ -1,4 +1,4 @@
-package io.travelclub.spring.store.mapstroe;
+package io.travelclub.spring.store.mapstore;
 
 import io.travelclub.spring.aggregate.club.TravelClub;
 import io.travelclub.spring.store.ClubStore;
