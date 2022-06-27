@@ -1,6 +1,6 @@
 해당 Repo는 [여기](https://www.youtube.com/playlist?list=PLOSNUO27qFbsW_JuXmzrFxPw7qzPOFfQs)를 보고 공부하였습니다.
 
-# 공부기록
+# 공부 기록
 
 프로젝트는 spring5, maven으로 진행.
 
@@ -9,14 +9,14 @@ UML entities, services, stores 정의
 
 ## 2-3 
 pom.xml은 maven의 기본설정을 담고 있다.
-그룹id, 아티팩트id, 버전정보
+그룹id, 아티팩트id, 버전정보,
 프로퍼티와 사용하는 라이브러리(dependency)가 있다.
 
-첫번째는 Spring core(IoC를 사용하기 위한 Spring core라이브러리)가 있다.
-두번째는 lombok 이며 생산성을 위해 사용하는 도구
+첫번째는 Spring core(IoC를 사용하기 위한 Spring core라이브러리)가 있다.<br>
+두번째는 lombok 이며 생산성을 위해 사용하는 도구<br>
 set, get 메서드, 생성자 클래스를 만들때 사용하는 코드들.
 
-인텔리제이 우측에 maven항목에 Lifesycle, Plugins, Dependencies가 있다.
+인텔리제이 우측에 maven항목에 Lifesycle, Plugins, Dependencies가 있다.<br>
 Dependencies에 spring-context에 다양한 라이브러리 가 있다.
 
 
@@ -110,3 +110,109 @@ bean 으로 등록할 때는 이렇게 "이 특정 설정 파일에다가 어떤
 이 역할을 IoC 컨테이너가 하는것이다. <br>
 
 (bean 객체를 생성하고 하는 부분들도 BeanFactory 라고 하는 Spring의 라이브러리 중에 특정 BeanFactory 클래스가 그런 작업들을 진행을 한다.)
+
+# 2-6
+
+## bean 객체가 등록되었는지 확인
+travelclub 패키지에 테스트를 위한 TravelClubApp 클래스 생성
+```java
+public class TravelClubApp {
+    public static void main(String[] args) {
+        // ClassPathXmlApplicationContext정보를 읽어온다. (applicationContext.xml로 설정정보를 읽어오겠다)
+        ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
+
+        // 실제로 bean이 등록되었는지 확인
+        String[] beanNames = context.getBeanDefinitionNames();
+        // bean의 id들이 출력될 것이다.
+        System.out.println(Arrays.toString(beanNames));
+        // 실행하면 [clubStore, clubService] 두개의 bean이 이상없이 등록됨을 확인할 수 있다.
+    }
+}
+```
+설정하는 방법은 자바클래스 또는 ClassPathXmlApplicationContext 이외의 다른 클래스들도 존재한다.<br> 
+
+그런데 앞서 2-6방법처럼 클래스들을 일일이 bean 태그로 만들기에는 어려움이 있다. <br>
+스프링에는 context에 component-scan과 base-package라는 걸 지정해 준다.
+```xml
+    <!--    base-package가 되는 곳에서부터 하위로 내려가면서 컴포넌드들 즉, bean들을 scan하라는 의미-->
+    <context:component-scan base-package="io.travelclub.spring"/>
+```
+일일이 자기가 bean 으로 등록해주지 않고 특정 패키지부터 bean 들을 찾아라 라는 의미이다.
+
+실행하면 다음 결과가 나온다.
+```
+[org.springframework.context.annotation.internalConfigurationAnnotationProcessor, 
+org.springframework.context.annotation.internalAutowiredAnnotationProcessor, 
+org.springframework.context.event.internalEventListenerProcessor, 
+org.springframework.context.event.internalEventListenerFactory]
+```
+아까 등록해두었던 bean들은 등록이 안되어있고 spring framework의 bean들이 출력됨을 확인할 수 있다. <br>
+왜냐하면 ClubMapStore 나 ClubServiceLogic 이나 다 bean 으로 등록이 되어야 하는데
+이 bean 들을 어떻게 등록하는지를 지정을 안해놓았다.<br>
+그래서 ClubMapStore 나 Entity 클래스들이나 지금 모두 다 똑같은 클래스이기 때문에 bean 으로 등록이 안된다.<br> 
+이럴 때 bean 으로 등록하는 방법은 bean으로 사용되는 각 클래스에다가 어노테이션을 넣어 준다.
+<br><br>
+각 클래스 위에 어노테이션을 지정해 보았다.
+```java
+@Service
+public class ClubServiceLogic implements ClubService {
+    // ...
+}
+```
+
+```java
+@Repository
+public class ClubMapStore implements ClubStore {
+    // ...
+}
+
+```
+이렇게 어노테이션을 등록을 하면<br>
+실제로 ClubServiceLogic 과 ClubMapStore 는 Spring bean 으로 등록되는 클래스가 된다. 
+```
+[clubServiceLogic, 
+clubMapStore, 
+org.springframework.context.annotation.internalConfigurationAnnotationProcessor, 
+org.springframework.context.annotation.internalAutowiredAnnotationProcessor, 
+org.springframework.context.event.internalEventListenerProcessor, 
+org.springframework.context.event.internalEventListenerFactory]
+```
+별도의 id 를 지정해 주지 않았기 때문에 실제로 클래스명이 id 로 사용되는 형태를 알 수 있다.<br>
+만약 이걸 별도의 id 로 등록하려면, 어노테이션에 문자열로 이름을 넣으면 된다. 
+```java
+@Repository("ClubStore")
+public class ClubMapStore implements ClubStore {
+    // ...
+}
+```
+
+등록이 완료되었으니 사용을 해보자. <br>
+실제 service의 create메서드를 호출해서 사용할 것이다.<br>
+먼저 clubServiceLogic의 registerClub를 구현한다. 
+```java
+@Service("clubService")
+public class ClubServiceLogic implements ClubService {
+    @Override
+    public String registerClub(TravelClubCdo club) {
+        TravelClub newClub = new TravelClub(club.getName(), club.getIntro());
+        newClub.checkValidation();
+        return clubStore.create(newClub);
+    }
+}
+```
+파라미터에 TravelClubCdo 클래스가 입력된다.<br>
+(cdo: Create Domain Object)<br>
+(sdo: Service Domain Object) <br>
+cdo는 create될 때 필요한 데이터들을 별도의 Domain Object에 나눠놓은 것이다.<br>
+
+
+```java
+public class TravelClubApp {
+    public static void main(String[] args) {
+        // ClubServiceLogic에 register를 구현하고 TravelClub에서 실제로 register를 하는 과정
+        TravelClubCdo clubCdo = new TravelClubCdo("TravelClub", "Test TravelClub");
+        // Spring 컨테이너로 하여금 bean 을 생성하게하고 그 bean 을 찾아오는 코드
+        ClubService clubService = context.getBean("clubService", ClubService.class);
+    }
+}
+```
