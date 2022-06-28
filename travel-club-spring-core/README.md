@@ -317,3 +317,91 @@ Spring IoC 컨테이너 입장에서 bean 객체를 넣어줄 때 MemberStore라
 
 ## 2-9
 MemberServiceLogic 구현
+
+## 2-10
+Spring IoC/DI 개요
+- 일반적인 객체지향 프로그램에서는 객체를 사용하는 시점에 직접 객체를 생성하여 사용함
+- 객체간의 의존성을 줄이기 위해 인터페이스, 추상클래스 이용
+- 소스코드상에서 하드코딩한 객체 생성구현은 객체간의 의존성 강요
+- 의도하지는 않았지만 직접 객체생성을 통해 객체 결합도가 높아짐(=tight coupling)
+
+![img.png](readmeImg/img18-1.png)
+결합도가 높아진다 => ClubMapStore가 아닌 ClubJPAStore라는 클래스를 만들어서 이 클래스를 이용한다 라고 가정하자<br>
+ClubMapStore를 삭제하고 ClubJPAStore로 전부 수정해 주어야 한다...
+이를 Spring IoC에게 맡기게 되면 ClubServiceLogic 에서는 ClubStore 만 알고 그 구현체가 그게 MapStore 든 아니면 JPAStore 이든 상관없이 ClubServiceLogic을 사용할 수 있게 된다.
+<br><br>
+
+![img.png](readmeImg/img19.png)
+IoC는 통제 방향의 변경을 의미한다. <br>
+CLI, GUI 환경을 예로 들 수 있는데, Command Line 프로그램 같은 경우 프로그램의 진행순서부터 사용되는 이벤트 그리고 이벤트의 순서, 이벤트의 처리 그리고 이벤트에 대한 결과 그 모든 것들을 내 프로그램 내에서 다 처리를 해야 한다.<br>
+즉, 전체 내용을 다 내 프로그램 내에서 제어를 한다.<br>
+그런데 GUI프로그램 같은 경우에는 이벤트와 관련된 내용들은 GUI 프레임워크에서 담당을 하게 된다.<br>
+그리고 내 프로그램에서는 특정 이벤트가 발생했을 때 어떤 일을 해 달라고 핸들러 부분만 구현을 한다.<br>
+그리고 이 핸들러를 호출하는 부분들 그리고 호출하고나서의 결과를 보여주는 부분들은 다 GUI 프레임워크한테 위임을 한다.<br>
+이를 통제 방향을 변경한다 (= 내가 제어하던 부분들을 다른 프레임워크 혹은 다른 누군가에게 위임)
+<br><br>
+Spring IoC도 이와 마찬가지 개념으로 볼 수 있다.<br>
+객체 생성부터 객체들의 관리 그리고 객체간의 관계들을 다 Spring IoC 컨테이너에게 위임을 해서 
+Spring IoC 컨테이너로 하여금 관리할 수 있도록 만들어 주는 것이다. <br>
+그리고 개발자는 그 부분에 대해서 신경을 쓰지 않는다.<br>
+(우리가 제어했던 것들 일반적으로 제어했던 부분들을 위임하는 형태로 Spring IoC 를 쓴다 라고 이해하면 될 것 같다...)
+
+![img.png](readmeImg/img.png)
+즉, <br>
+기존의 객체를 제어하는 방식은 A 라는 클래스에서 B 라는 클래스의 인스턴스를 사용하고자 할 때 생성을 하고, 
+생성한 이후에 그 참조 정보를 가지고 B 클래스의 다수의 기능들을 사용을 하게 된다. <br>
+기존 방식과 IoC 를 통한 객체의 제어 방식의 차이는 A 라는 클래스는 B 라는 클래스의 존재 자체를 모르는 상태다<br>
+다만 A 클래스는 B 클래스가 구현하고 있는 인터페이스에 대한 참조만 가지고 있다. 그리고 IoC 컨테이너가 B 클래스의 객체 생성부터
+이렇게 생성한 B 객체의 인스턴스 정보를 A 라는 클래스에게 전해준다.<br>
+=> 이걸 의존관계 주입이라고 한다.
+<br><br>
+여기서 개발자는 IoC 컨테이너로 하여금 B 클래스를 관리할 수 있도록
+즉, 생성하고 의존 관계를 주입해 줄 수 있도록 그 설정 정보들을 기록해 줘야 한다. 
+<br>
+IoC는 구현하는 방법에 따라 DL(Dependency LookUp)과 DI(Dependency Injection)이 있다. 
+
+
+### DL
+![img.png](readmeImg/img21.png)
+
+### DI
+![img.png](readmeImg/img22.png)
+
+### IoC, DI를 적용하지 않은 경우 VS 적용한 경우
+![img.png](readmeImg/img23.png)
+- DI는 클래스 사이의 의존관계를 빈(bean) 설정 정보를 바탕으로 컨테이너가 자동적으로 연결해 주는 것을 말한다.
+- 개발자들은 제어를 담당할 필요 없이 빈 설정 파일에 의존 관계가 필요하다는 정보만 추가해 주면 된다.
+
+IoC 컨테이너에게 주면 실제로 코드가 들어 갔을 때에는 실제로 이렇게 SubBar 클래스의 존재를 Foo 라는 클래스에서 보지 않아도 된다<br>
+즉, Foo 클래스는 SubBar 라는 이 클래스 존재에 대해서 모른다.<br>
+
+### DI를 적용했을 때
+![img.png](readmeImg/img24.png)
+유추해 볼 수 있는 것은 "IoC 를 사용하기 위해서 별도의 설정을 하고 있다" 라는 것
+ClubServiceLogic 에서는 ClubMapStore 에 대한 존재를 알고 있지 않은 상태에서 ClubMapStore 에 이 메소드들을 ClubStore 라는 인터페이스 이 타입의 메소드를 호출하면서 사용할 수 있게 된다.<br>
+
+#### 의존관계를 설정하는 방식
+1. xml이용
+2. 어노테이션 이용
+3. 자바 소스를 이용
+
+보통 xml, 어노테이션, 자바 소스를 병행해서 사용한다.
+
+## 2-11 
+Spring IoC 이해하기2
+
+### Spring IoC 용어
+![img.png](readmeImg/img25.png)
+<br><br>
+service 레이어의 ServiceLogic 클래스들 ClubServiceLogic 그리고 MemberServiceLogic => Spring Bean<br>
+store 레이어의 ClubMapStore 그리고 MemberMapStore 클래스 => Bean 객체로 IoC컨테이너에 의해서 관리되는 클래스들<br>
+Entity 클래스 => Spring Bean 으로 관리되어지는 클래스가 아님.<br>
+<br>
+Bean 으로 관리되는 클래스들은 모두 IoC 컨테이너에게 그 제어를 맡기게 된다.<br>
+Spring IoC 컨테이너에 의해서 관리되는 클래스들은 모두 Bean 혹은 Spring Bean 이라는 이름으로 통칭한다.<br>
+Bean 객체들을 관리해주는 그 클래스들, 그 형태들을 Bean Factory 라고 한다.<br>
+Bean Factory 를 조금 더 확장한 클래스를 applicationContext 라고 한다.<br>
+applicationContext 에 대한 정보들은 applicationContext.xml 이라는 파일에 담아놨는데 applicationContext.xml 파일이 바로 설정정보 설정 메타정보 라고 이야기 한다.<br>
+
+### IoC 컨테이너
+![img.png](readmeImg/img26.png)
