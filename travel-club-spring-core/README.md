@@ -4,6 +4,7 @@
 
 프로젝트는 spring5, maven으로 진행.
 
+- ch2의 목표: Spring IoC 컨테이너를 이용해서 Spring Bean 으로 등록하고 사용하고 DI 가 적용되는 부분들을 직접 코드로 확인
 ## 2-1, 2-2
 UML entities, services, stores 정의
 
@@ -111,9 +112,9 @@ bean 으로 등록할 때는 이렇게 "이 특정 설정 파일에다가 어떤
 
 (bean 객체를 생성하고 하는 부분들도 BeanFactory 라고 하는 Spring의 라이브러리 중에 특정 BeanFactory 클래스가 그런 작업들을 진행을 한다.)
 
-# 2-6
+## 2-6
 
-## bean 객체가 등록되었는지 확인
+### bean 객체가 등록되었는지 확인
 travelclub 패키지에 테스트를 위한 TravelClubApp 클래스 생성
 ```java
 public class TravelClubApp {
@@ -217,12 +218,12 @@ public class TravelClubApp {
 }
 ```
 
-### 왜 Clubservice.class를 받아올까? (강의 댓글 참고)
+### 왜 Clubservice.class를 받아올까? (강의 댓글 복사)
 getBean() 메소드는  Spring이 제공하는 BeanFactory가 정의하고 있는 메소드로 getBean(String name), getBean(String name, Class<T> requiredType) 등  5개의 메소드가 오버로딩 되어 있습니다. 이중에서 예제에서 사용한 메소드는 getBean(String name, Class<T> requiredType) 형태의 메소드 입니다. 여기서 궁금하신 부분이 바로 두번째 파라미터 requiredType 일텐데요. getBean() 메소드의 목적은 컨테이너로부터 정확한 빈객체를 가져올 수 있도록 하는 것인데요.
 
 만일 getBean(String name)이라는 메소드를 이용 한다면 "clubService"라는 등록한 빈의 이름만 가지고도 빈객체를 가져올 수 있습니다. 다만, 이렇게 이름만 가지고 빈객체를 요청했을 때 발생할 수 있는 예외는 해당 "이름"으로 등록된 빈이 없거나(NoSuchBeanDefinitionException), 빈 객체를 가져올 수 없는(BeansException) 두 가지 밖에 없습니다.
 
-이렇게 발생할 수 있는 예외를 좀더 세분화해서 만약 빈을 찾지 못했다면, "이름"이 문제인지 아니면 찾아온 빈의 타입이 맞지 않는 것인지로 좀더 세분화 할 수 있게 하기 위해 getBean(String name, Class<T> requiredType) 이 메소드를 사용한 것입니다. 아무래도 이부분에서 헤깔리시는 부분이 ClubServiceLogic.class가 아니고 ClubService.class 인지 이실텐데요. 만약 ClubServiceLogic.class가 되려면 ClubServiceLogic clubService = context.getBean(...)과 같은 코드가 되어야 할텐데 이렇게 되면 빈으로 등록할 필요도 없어지겠죠. 그냥 new를 하면 될테니까요. 따라서 ClubService clubService = context.getBean(...)은 ClubService 인터페이스를 implements한 빈을 반환하는 것이 됩니다. 모든 예제 코드가 그렇지만 ClubService 인터페이스를 implements한 빈 객체는 ClubServiceLogic가 유일합니다.
+이렇게 발생할 수 있는 예외를 좀더 세분화해서 만약 빈을 찾지 못했다면, "이름"이 문제인지 아니면 찾아온 빈의 타입이 맞지 않는 것인지로 좀더 세분화 할 수 있게 하기 위해 getBean(String name, Class<T> requiredType) 이 메소드를 사용한 것입니다. 아무래도 이부분에서 헷갈리시는 부분이 ClubServiceLogic.class가 아니고 ClubService.class 인지 이실텐데요. 만약 ClubServiceLogic.class가 되려면 ClubServiceLogic clubService = context.getBean(...)과 같은 코드가 되어야 할텐데 이렇게 되면 빈으로 등록할 필요도 없어지겠죠. 그냥 new를 하면 될테니까요. 따라서 ClubService clubService = context.getBean(...)은 ClubService 인터페이스를 implements한 빈을 반환하는 것이 됩니다. 모든 예제 코드가 그렇지만 ClubService 인터페이스를 implements한 빈 객체는 ClubServiceLogic가 유일합니다.
 
 끝으로 getBean() 메소드에 대한 API 설명 중에서 파라미터에 대한 설명들을 함께 올려드립니다. 이해에 도움이 되셨으면 좋겠습니다.
 
@@ -275,4 +276,44 @@ component-scan 방식으로 bean을 탐색한다.
 ```
 
 ## 2-8
-MemberMapStore 구현
+### MemberMapStore 구현
+내용을 보면 ClubMapStore나 검색하는 조건이 하나 더 늘어난 거 이외에는 구현되는 내용들이 크게 다를바가 없다.<br> 
+Store 영역은 데이터를 보통은 CRUD 라고 한다.<br>
+
+### MemberServiceLogic 구현
+clubServiceLogic에서 했던 것과 똑같이 의존성을 주입한다.
+```java
+public class MemberServiceLogic implements MemberService {
+    
+    private MemberStore memberStore;
+    
+    public MemberServiceLogic(MemberMapStore memberStore) {
+        this.memberStore = memberStore;
+    }
+}
+```
+bean 으로 등록된 클래스를(ClubMapStore, MemberMapStore) MemberServiceLogic 에서
+MemberMapStore 사용할 때 생성자를 통해서 주입이 된다. <br>
+MemberMapStore memberStore 파라미터를 통해서 Spring Bean 으로 등록되어 있는 
+MemberStore 인터페이스 implements 하고 있는 이 MemberMapStore 라는 객체가 주입이 된다. <br>
+MemberMapStore 객체에 대한 인스턴스 즉, new는 Spring IoC 컨테이너가 MemberMapStore를 인스턴스화 해서
+사용되는 시점에 주입될 수 있도록 하기 위한 절차(의존성 주입)를 했다.<br>
+1. @Service 어노테이션 추가
+2. applicationContext.xml에 component-scan을 통한 base-package지정
+
+bean 으로 사용될 클래스들에 대해서 이렇게 어노테이션을 주입해 주는 것만으로도 bean 으로 등록된다
+<br>
+
+### 왜 Clubservice.class를 받아올까? 에 대한 보충설명
+위의 코드에서 memberStore라는 파라미터를 선언했다.<br>
+MemberMapStore를 MemberServiceLogic할 때 new 해주라는 명시가 없다. <br>
+그런데 memberStore라는 인터페이스를 implements 하고 있는 클래스는 MemberMapStore밖에 없다.<br>
+Spring IoC 컨테이너 입장에서 bean 객체를 넣어줄 때 MemberStore라는 인터페이스를 implements하고 있는 Spring Bean이
+어떤 객체를 가지고 있는지 찾아볼 때 MemberMapStore밖에 없다. <br>
+그래서 MemberStore라는 인터페이스를 implements하고 있는 MemberMapStore를 주입해 줘야 되겠구나 하고 주입을 하는 것이다.<br>
+이외의 방법으로 set메서드를 통해 생성자를 없애고 @Autowired라는 어노테이션을 추가하는 방법이 있다.<br>
+만약 implements하는 클래스가 하나가 아닌 여러개라면 @Qualifier라는 어노테이션을 통해 id를 나누어 등록한 후 해당 id를 명시해주는 방법이 있다.
+(implements라는 클래스를 설계관점에서 어려개 만드는 일은 거의 없으므로 @Qualifier라는 어노테이션은 잘 쓰이는 경우가 없다.)
+
+## 2-9
+MemberServiceLogic 구현
