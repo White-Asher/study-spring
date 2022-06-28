@@ -1,11 +1,13 @@
 package io.travelclub.spring;
 
+import io.travelclub.spring.aggregate.club.TravelClub;
 import io.travelclub.spring.service.ClubService;
 import io.travelclub.spring.service.sdo.TravelClubCdo;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.util.Arrays;
+import java.util.Date;
 
 public class TravelClubApp {
     public static void main(String[] args) {
@@ -18,12 +20,16 @@ public class TravelClubApp {
         System.out.println(Arrays.toString(beanNames));
         // 실행하면 [clubStore, clubService] 두개의 bean이 이상없이 등록됨을 확인할 수 있다.
 
-        //
-        TravelClubCdo clubCdo = new TravelClubCdo("TravelClub", "Test TravelClub");
-        ClubService clubService = context.getBean("clubService", ClubService.class);
 
-        String clubId = clubService.registerClub(clubCdo);
-
-        System.out.println(clubId);
+//        TravelClubCdo clubCdo = new TravelClubCdo("TravelClub", "Test TravelClub");
+//        ClubService clubService = context.getBean("clubService", ClubService.class);
+//
+//        String clubId = clubService.registerClub(clubCdo);
+//
+//        TravelClub foundecClub = clubService.findClubById(clubId);
+//
+//        System.out.println("Club name " + foundecClub.getName());
+//        System.out.println("Club intro " + foundecClub.getIntro());
+//        System.out.println("Club foundationTime " + new Date(foundecClub.getFoundationTime()));
     }
 }

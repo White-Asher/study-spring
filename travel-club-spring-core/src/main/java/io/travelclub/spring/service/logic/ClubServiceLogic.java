@@ -6,6 +6,7 @@ import io.travelclub.spring.service.sdo.TravelClubCdo;
 import io.travelclub.spring.shared.NameValueList;
 import io.travelclub.spring.store.ClubStore;
 import io.travelclub.spring.store.mapstore.ClubMapStore;
+import io.travelclub.spring.util.exception.NoSuchClubException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,21 +29,29 @@ public class ClubServiceLogic implements ClubService {
 
     @Override
     public TravelClub findClubById(String id) {
-        return null;
+        return clubStore.retrieve(id);
     }
 
     @Override
     public List<TravelClub> findClubsByName(String name) {
-        return null;
+        return clubStore.retrieveByName(name);
     }
 
     @Override
     public void modify(String clubId, NameValueList nameValues) {
-
+        TravelClub foundedClub = clubStore.retrieve(clubId);
+        if(foundedClub == null){
+            throw new NoSuchClubException("No such club with id : "+clubId);
+        }
+        foundedClub.modifyValues(nameValues);
+        clubStore.update(foundedClub);
     }
 
     @Override
     public void remove(String clubId) {
-
+        if(!clubStore.exists(clubId)){
+            throw new NoSuchClubException("No such club with id : " + clubId);
+        }
+        clubStore.delete(clubId);
     }
 }
