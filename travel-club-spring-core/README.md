@@ -216,3 +216,63 @@ public class TravelClubApp {
     }
 }
 ```
+
+### 왜 Clubservice.class를 받아올까? (강의 댓글 참고)
+getBean() 메소드는  Spring이 제공하는 BeanFactory가 정의하고 있는 메소드로 getBean(String name), getBean(String name, Class<T> requiredType) 등  5개의 메소드가 오버로딩 되어 있습니다. 이중에서 예제에서 사용한 메소드는 getBean(String name, Class<T> requiredType) 형태의 메소드 입니다. 여기서 궁금하신 부분이 바로 두번째 파라미터 requiredType 일텐데요. getBean() 메소드의 목적은 컨테이너로부터 정확한 빈객체를 가져올 수 있도록 하는 것인데요.
+
+만일 getBean(String name)이라는 메소드를 이용 한다면 "clubService"라는 등록한 빈의 이름만 가지고도 빈객체를 가져올 수 있습니다. 다만, 이렇게 이름만 가지고 빈객체를 요청했을 때 발생할 수 있는 예외는 해당 "이름"으로 등록된 빈이 없거나(NoSuchBeanDefinitionException), 빈 객체를 가져올 수 없는(BeansException) 두 가지 밖에 없습니다.
+
+이렇게 발생할 수 있는 예외를 좀더 세분화해서 만약 빈을 찾지 못했다면, "이름"이 문제인지 아니면 찾아온 빈의 타입이 맞지 않는 것인지로 좀더 세분화 할 수 있게 하기 위해 getBean(String name, Class<T> requiredType) 이 메소드를 사용한 것입니다. 아무래도 이부분에서 헤깔리시는 부분이 ClubServiceLogic.class가 아니고 ClubService.class 인지 이실텐데요. 만약 ClubServiceLogic.class가 되려면 ClubServiceLogic clubService = context.getBean(...)과 같은 코드가 되어야 할텐데 이렇게 되면 빈으로 등록할 필요도 없어지겠죠. 그냥 new를 하면 될테니까요. 따라서 ClubService clubService = context.getBean(...)은 ClubService 인터페이스를 implements한 빈을 반환하는 것이 됩니다. 모든 예제 코드가 그렇지만 ClubService 인터페이스를 implements한 빈 객체는 ClubServiceLogic가 유일합니다.
+
+끝으로 getBean() 메소드에 대한 API 설명 중에서 파라미터에 대한 설명들을 함께 올려드립니다. 이해에 도움이 되셨으면 좋겠습니다.
+
+Parameters :
+name - the name of the bean to retrieve
+requiredType - type the bean must match; can be an interface or superclass
+
+
+## 2-7
+ClubSerivceLogic클래스의 findClubById, findClubsByName, modify, remove 메서드 구현<br>
+
+mainApp클래스에서 findByClubId까지 해서 실제로 해당 데이터가 존재하는지 확인할 것이다.
+```java
+public class TravelClubApp {
+    public static void main(String[] args) {
+        String clubId = clubService.registerClub(clubCdo);
+
+        TravelClub foundecClub = clubService.findClubById(clubId);
+
+        System.out.println("Club name " + foundecClub.getName());
+        System.out.println("Club intro " + foundecClub.getIntro());
+        System.out.println("Club foundationTime " + new Date(foundecClub.getFoundationTime()));
+    }
+}
+/*output
+...
+Club name TravelClub
+Club intro Test TravelClub
+Club foundationTime Tue Jun 28 14:40:36 KST 2022
+ */
+```
+IoC 이해를 위한 bean등록을 한번 더 수행해 볼 것이다.<br>
+service 패키지에 MemberServiceLogic 클래스 생성, store패키지에 MemberMapStore 클래스 생성<br>
+이후 어노테이션 생성
+```java
+@Repository
+public class MemberMapStore implements MemberStore {}
+
+@Service
+public class MemberServiceLogic implements MemberService {}
+```
+main에서 실행해본다.
+```
+[clubService, memberServiceLogic, ClubStore, memberMapStore ... ]
+```
+
+component-scan 방식으로 bean을 탐색한다.
+```xml
+<context:component-scan base-package="io.travelclub.spring"/>
+```
+
+## 2-8
+MemberMapStore 구현
