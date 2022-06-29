@@ -48,7 +48,7 @@ ClubMapStore와 연관된 클래스들을 전부 수정해 주어야 한다.
 (IoC: 제어의 역전 -> 개발자가 new하지 않고 IoC 컨테이너에 의해 new가 돼서 객체도 생성이 된다. 또한 관계들도 구성을 해준다는 의미가 IoC의 내용이다.)
 
 ### Spring bean
-![img.png](readmeImg/img.png)
+![img.png](readmeImg/img20.png)
 
 객체 생성을 IoC 컨테이너에 맡기려면 그 대상이 되는 클래스들을 등록해야한다.
 이렇게 등록된 클래스들을 Spring bean이라고 한다.
@@ -319,7 +319,7 @@ Spring IoC 컨테이너 입장에서 bean 객체를 넣어줄 때 MemberStore라
 MemberServiceLogic 구현
 
 ## 2-10
-Spring IoC/DI 개요
+### Spring IoC/DI 개요
 - 일반적인 객체지향 프로그램에서는 객체를 사용하는 시점에 직접 객체를 생성하여 사용함
 - 객체간의 의존성을 줄이기 위해 인터페이스, 추상클래스 이용
 - 소스코드상에서 하드코딩한 객체 생성구현은 객체간의 의존성 강요
@@ -331,8 +331,12 @@ ClubMapStore를 삭제하고 ClubJPAStore로 전부 수정해 주어야 한다..
 이를 Spring IoC에게 맡기게 되면 ClubServiceLogic 에서는 ClubStore 만 알고 그 구현체가 그게 MapStore 든 아니면 JPAStore 이든 상관없이 ClubServiceLogic을 사용할 수 있게 된다.
 <br><br>
 
-![img.png](readmeImg/img19.png)
-IoC는 통제 방향의 변경을 의미한다. <br>
+- IoC는 통제 방향의 변경을 의미한다.
+- 프레임워크가 갖는 일반적인 속성으로 특정 일에 대한 주체를 변경하는 것
+- 최초의 Command Line 프로그램은 내 프로그램이 모든 것을 통제
+- 이와 다르게, GUI 프로그램은 프레임워크가 통제하며 내 프로그램에서는 이벤트 핸들러만 구현
+
+![img.png](readmeImg/img19.png) 
 CLI, GUI 환경을 예로 들 수 있는데, Command Line 프로그램 같은 경우 프로그램의 진행순서부터 사용되는 이벤트 그리고 이벤트의 순서, 이벤트의 처리 그리고 이벤트에 대한 결과 그 모든 것들을 내 프로그램 내에서 다 처리를 해야 한다.<br>
 즉, 전체 내용을 다 내 프로그램 내에서 제어를 한다.<br>
 그런데 GUI프로그램 같은 경우에는 이벤트와 관련된 내용들은 GUI 프레임워크에서 담당을 하게 된다.<br>
@@ -346,9 +350,14 @@ Spring IoC 컨테이너로 하여금 관리할 수 있도록 만들어 주는 �
 그리고 개발자는 그 부분에 대해서 신경을 쓰지 않는다.<br>
 (우리가 제어했던 것들 일반적으로 제어했던 부분들을 위임하는 형태로 Spring IoC 를 쓴다 라고 이해하면 될 것 같다...)
 
-![img.png](readmeImg/img.png)
-즉, <br>
-기존의 객체를 제어하는 방식은 A 라는 클래스에서 B 라는 클래스의 인스턴스를 사용하고자 할 때 생성을 하고, 
+### 기존 객체 제어방식 VS IoC 객체 제어방식
+- 객체 간 결합도가 높으면, 해당 클래스가 변경될 때 결합된 다른 클래스도 같이 수정될 가능성이 있다.
+- IoC는 객체 생성 책임을 컨테이너에게 위임하여, 객체간의 결합도를 낮춘다(loose coupling)
+- IoC를 통한 객체 제어 방식은 기존 로직에서 객체를 생성하는 로직을 제거한다.
+- IoC는 구현하는 방법에 따라, Dependency Lookup과, Dependency Injection 방법이 있다.
+
+![img.png](readmeImg/img20.png)
+즉, 기존의 객체를 제어하는 방식은 A 라는 클래스에서 B 라는 클래스의 인스턴스를 사용하고자 할 때 생성을 하고, 
 생성한 이후에 그 참조 정보를 가지고 B 클래스의 다수의 기능들을 사용을 하게 된다. <br>
 기존 방식과 IoC 를 통한 객체의 제어 방식의 차이는 A 라는 클래스는 B 라는 클래스의 존재 자체를 모르는 상태다<br>
 다만 A 클래스는 B 클래스가 구현하고 있는 인터페이스에 대한 참조만 가지고 있다. 그리고 IoC 컨테이너가 B 클래스의 객체 생성부터
@@ -362,20 +371,35 @@ IoC는 구현하는 방법에 따라 DL(Dependency LookUp)과 DI(Dependency Inje
 
 
 ### DL
+- Dependency LookUp방식은 EJB나 Springdptj JNDI리소스를 얻는 방식이다.
+- 컨테이너가 제공하는 Lookup Context를 통해서 필요한 자원이나 객체를 얻을 수 있다.
+- 그러나 이 방식은 결과적으로 컨테이너 API에 대한 의존성으 ㄹ높이게 된다.
+- 컨테이너와의 의존성을 줄이기 위해서는 DI방식을 사용한다.
+
 ![img.png](readmeImg/img21.png)
 
 ### DI
+- 의존 관계 주입 Dependency Injection를 줄여서 DI라고 한다.
+- DI를 통해, 외부에서 객체를 생성하는 시점에 참조하는 객체에게 의존관계를 제공한다.
+- 협업 객체의 참조를 어떻게 얻어낼 것인가라는 관점에서 책임성의 역행(Invesion Of Responsibility)이라고 한다.
+- 객체가 인터페이스만 알고 있으므로, 느슨한 결합이 가능하다.
+
 ![img.png](readmeImg/img22.png)
 
 ### IoC, DI를 적용하지 않은 경우 VS 적용한 경우
-![img.png](readmeImg/img23.png)
-- DI는 클래스 사이의 의존관계를 빈(bean) 설정 정보를 바탕으로 컨테이너가 자동적으로 연결해 주는 것을 말한다.
+- DI는 클래스 사이의 의존관계를 빈 설정 정보를 바탕으로 컨테이너가 자동적으로 연결해주는 것을 말한다.
 - 개발자들은 제어를 담당할 필요 없이 빈 설정 파일에 의존 관계가 필요하다는 정보만 추가해 주면 된다.
 
+![img.png](readmeImg/img23.png)
 IoC 컨테이너에게 주면 실제로 코드가 들어 갔을 때에는 실제로 이렇게 SubBar 클래스의 존재를 Foo 라는 클래스에서 보지 않아도 된다<br>
 즉, Foo 클래스는 SubBar 라는 이 클래스 존재에 대해서 모른다.<br>
 
 ### DI를 적용했을 때
+- 사용하는 객체 생성을 IoC컨테이너에 위임해, 객체 생성 로직이 없어짐.
+- 객체 생성에 대한 주도권을 객체를 필요로 하는 곳으로 넘겨줘 필요할 때 필요한 곳에서 생성하는 방법이다.
+- Spring은 Setter Injection, 생성자 Injection, 메소드 Injection등 세가지 DI패턴을 모두 지원한다.
+- Spring은 의존관계를 설정하는 방법으로 XML, 어노테이션, 자바소스를 사용하는 방법으로 제공한다. 
+
 ![img.png](readmeImg/img24.png)
 유추해 볼 수 있는 것은 "IoC 를 사용하기 위해서 별도의 설정을 하고 있다" 라는 것
 ClubServiceLogic 에서는 ClubMapStore 에 대한 존재를 알고 있지 않은 상태에서 ClubMapStore 에 이 메소드들을 ClubStore 라는 인터페이스 이 타입의 메소드를 호출하면서 사용할 수 있게 된다.<br>
@@ -387,12 +411,44 @@ ClubServiceLogic 에서는 ClubMapStore 에 대한 존재를 알고 있지 않�
 
 보통 xml, 어노테이션, 자바 소스를 병행해서 사용한다.
 
-## 2-11 
-Spring IoC 이해하기2
+## 2-11 : Spring IoC 이해하기2
 
 ### Spring IoC 용어
-![img.png](readmeImg/img25.png)
-<br><br>
+- 빈(Bean)이란, Spring이 IoC방식으로 관리하는 객체로, 관리되는 객체(Managed Object)라고 한다.
+- IoC컨테이너는 빈의 생성과 제어의 관점에서 빈 팩토리(Bean Factory)라고 한다.
+- 애플리케이션 컨텍스트는 Spring이 제공하는 애플리케이션 지원 기능을 모두 포함하는 의미이다.
+- Spring프레임워크는 IoC컨테이너와 애플리케이션 컨텍스트를 포함한 Spring의 모든 기능을 포괄한다.
+
+<table style="border-collapse: collapse; width: 100%;" border="1" data-ke-align="alignLeft">
+<tbody>
+<tr>
+<td style="width: 25.1162%;">IoC 용어</td>
+<td style="width: 74.8838%;">설명</td>
+</tr>
+<tr>
+<td style="width: 25.1162%;">빈(bean)</td>
+<td style="width: 74.8838%;">스프링이 IoC방식으로 관리하는 오브젝트<br />또는 관리 되는 오브젝트라고 한다.<br />스프링이 직접 그 생성과 제어를 담당하는 오브젝트만을 빈(bean)이라고 한다,</td>
+</tr>
+<tr>
+<td style="width: 25.1162%;">빈 팩토리(bean factory)</td>
+<td style="width: 74.8838%;">스프링이 IoC를 담당하는 핵심 컨테이너로 빈을 등록, 생성하고, 조회하고 돌려주고, 그 외에 부가적으로 빈을 관리하는 기능을 담당함.<br />보통 이 빈 팩토리를 바로 사용하지 않고 이를 확장한 애플리케이션 컨텍스트를 이용함.</td>
+</tr>
+<tr>
+<td style="width: 25.1162%;">애플리케이션 컨텍스트<br />(application context)</td>
+<td style="width: 74.8838%;">빈 팩토리를 확장한 IoC 컨테이너로 빈을 등록하고 관리하는 기본적인 기능은 빈 팩토리와 동일함.<br />스프링이 제공하는 각종 부가 서비스를 추가로 제공함.</td>
+</tr>
+<tr>
+<td style="width: 25.1162%;">설정정보/설정 메타정보<br />(configuration metadata)</td>
+<td style="width: 74.8838%;">애플리케이션 컨텍스트 또는 빈 팩토리가 IoC를 적용하기 위해 사용하는 메타정보</td>
+</tr>
+<tr>
+<td style="width: 25.1162%;">스프링 프레임워크</td>
+<td style="width: 74.8838%;">IoC 컨테이너, 애플리케이션 컨텍스트를 포함해서 스프링이 제공하는 모든 기능을 칭함.</td>
+</tr>
+</tbody>
+</table>
+
+<br>
 service 레이어의 ServiceLogic 클래스들 ClubServiceLogic 그리고 MemberServiceLogic => Spring Bean<br>
 store 레이어의 ClubMapStore 그리고 MemberMapStore 클래스 => Bean 객체로 IoC컨테이너에 의해서 관리되는 클래스들<br>
 Entity 클래스 => Spring Bean 으로 관리되어지는 클래스가 아님.<br>
@@ -404,4 +460,23 @@ Bean Factory 를 조금 더 확장한 클래스를 applicationContext 라고 한
 applicationContext 에 대한 정보들은 applicationContext.xml 이라는 파일에 담아놨는데 applicationContext.xml 파일이 바로 설정정보 설정 메타정보 라고 이야기 한다.<br>
 
 ### IoC 컨테이너
+- 객체의 생성과 관계설정, 사용, 제거 등의 작업을 실제 코드 대신 독립된 컨테이너가 담당한다.
+- 코드 대신 컨테이너가 객체에 대한 제어권을 갖게 되어 이를 IoC라 하며, Spring 컨테이너를 IoC컨테이너 라고한다.
+- Spring에서 IoC를 담당하는 컨테이너는 BeanFactory, ApplicationContext가 있다.
+- Spring은 별다른 설정이 없을 경우 컨테이너가 관리하는 Bean 객체를 Singleton으로 생성한다.
+
 ![img.png](readmeImg/img26.png)
+Bean Factory 그리고 applicationContext 의 관계는 인터페이스를 구현한 구현체들로 IoC 컨테이너가 만들어져있다.<br>
+Bean Factory 인터페이스가 제공 해야 되는 그 핵심 기능들은 Bean 객체에 대한 생성 그리고 제공,  Bean 객체들을 어떻게 관리하는지에 대한 Bean의 라이프 사이클이라든지 이런 부분을 관리하는 핵심적인 메소드를 추상메소드로 정의하고 있다.<br>
+거기에 보시면 이걸 확장한 applicationContext 는 이제 Bean 을 만들 때 Singleton Registry 를 이용해서 단일 객체를 만든다든지 등 확장한 기능들을 가지고 있습니다. <br>
+그리고 이제 web 환경으로 가면 WebApplicationContext 라는 것도 사용을 하게 된다.<br> 
+직접 main 메소드에서 이렇게 설정 정보들을 읽어오는 형태가 아니라 이 컨테이너에게 대부분을 맡기는 형태로 구현을 하게 된다.<br>
+
+### 설정 메타 정보
+- 하나의 애플리케이션은 IoC컨테이너에 의해 POJO클래스와 설정 메타정보가 결합되어 만들어진다.
+- 설정 메타정보는 애플리케이션을 구성하는 객체와 객체 사이의 상호 의존성을 포함한다.
+- Spring은 XML설정 파일과 어노테이션 설정, 자바소스로 메타정보의 설정이 가능하다.
+![img.png](img27.png)
+
+앞서 두가지(XML, 어노테이션)를 이용한 메타정보를 설정해 보았다.<br>
+자바코드를 이용한 설정 메타 정보는 실제 클래스로 정의해 설정을 위한 클래스를 따로 만들게 된 형태이다.<br>
