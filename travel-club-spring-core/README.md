@@ -476,7 +476,38 @@ Bean Factory 인터페이스가 제공 해야 되는 그 핵심 기능들은 Bea
 - 하나의 애플리케이션은 IoC컨테이너에 의해 POJO클래스와 설정 메타정보가 결합되어 만들어진다.
 - 설정 메타정보는 애플리케이션을 구성하는 객체와 객체 사이의 상호 의존성을 포함한다.
 - Spring은 XML설정 파일과 어노테이션 설정, 자바소스로 메타정보의 설정이 가능하다.
+
 ![img.png](img27.png)
 
 앞서 두가지(XML, 어노테이션)를 이용한 메타정보를 설정해 보았다.<br>
 자바코드를 이용한 설정 메타 정보는 실제 클래스로 정의해 설정을 위한 클래스를 따로 만들게 된 형태이다.<br>
+이 경우는 이 설정을 위한 클래스의 어노테이션으로 @Configure 라는 어노테이션을 붙여서 사용하는 형태이다.<br>
+(이후 강의에서 해당 내용을 설명할것이다.) <br>
+Business Objects(POJO) 클래스들과 메타 정보를 가지고 IoC 컨테이너가 Bean 들을 생성해주고 관계들을 설정을 해주는 형태가 된다.<br>
+
+### XML 빈(bean) 관리
+- XML을 통해 Spring 빈을 설정할 수 있습니다. XML을 통한 빈 설정은 단순하며 사용하기 쉽다.
+- 일반적으로 사용하는 방식으로 빈의 설정 메타 정보를 XML문서에 기술한다.
+- XML 설정파일에 <bean> 태그를 작성하여 빈을 선언한다. 
+- Spring은 빈을 선언함과 동시에 <property>태그의 ref 요소를 이용하여 의존관계를 설정한다.
+```xml
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context" xsi:schemaLocation=" http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+<bean id="clubStore" class="io.travelclub.spring.store.mapstore.ClubMapStore">
+</bean>
+<bean id="clubService" class="io.travelclub.spring.service.logic.ClubServiceLogic">
+    <constructor-arg ref="clubStore"/> 
+</bean> 
+</beans>
+```
+```java
+public class ClubServiceLogic implements ClubService { //
+    private ClubStore clubStore;
+
+    public ClubServiceLogic(ClubStore clubStore) { //
+        this.clubStore = clubStore;
+    }
+    // ... 
+}    
+```
+위와 같은 형태는 spring2 버전까지 사용했던 방식, 현재는 어노테이션을 사용<br>
+(이전에 bean을 직접 등록한 과정을 수행한 이유는 => bean의 이해를 돕기 위해서...)<br>
